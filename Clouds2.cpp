@@ -83,14 +83,16 @@ int main() {
 		 0.0f,  1.0f, 0.0f,
 	};*/
 
-	static GLfloat g_vertex_buffer_data[1200 * 5];
+	const int groupsize = 3;
+	static GLfloat g_vertex_buffer_data[groupsize * 10];
 
 	int vertexCount = sizeof(g_vertex_buffer_data) / sizeof(GLfloat);
+
 	//printf("vertexCount: %d\n", vertexCount);
 
 	srand(time(NULL)); //initialize random seed
 
-	for (int i = 0; i < vertexCount - 2; i+=3) {
+	for (int i = 0; i < vertexCount - (groupsize - 1); i+=groupsize) {
 		g_vertex_buffer_data[i] = rand();
 		g_vertex_buffer_data[i + 1] = rand();
 		g_vertex_buffer_data[i + 2] = 0.0f;
@@ -108,7 +110,7 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-	glPointSize(1.0);
+	glPointSize(5.0);
 
 	do {
 
@@ -135,7 +137,7 @@ int main() {
 		);
 
 		// Draw the triangle !
-		glDrawArrays(GL_POINTS, 0, vertexCount/3); // 3 indices starting at 0 -> 1 triangle
+		glDrawArrays(GL_POINTS, 0, vertexCount/groupsize); // 3 indices starting at 0 -> 1 triangle
 
 		glDisableVertexAttribArray(0);
 
