@@ -84,7 +84,7 @@ int main() {
 	};*/
 
 	const int groupsize = 3;
-	static GLfloat g_vertex_buffer_data[groupsize * 10];
+	static GLfloat g_vertex_buffer_data[groupsize * 1500];
 
 	int vertexCount = sizeof(g_vertex_buffer_data) / sizeof(GLfloat);
 
@@ -110,7 +110,7 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-	glPointSize(5.0);
+	glPointSize(1.0);
 
 	do {
 
