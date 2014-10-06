@@ -17,6 +17,11 @@ using namespace glm;
 
 #include <shader.hpp>
 
+struct vertex {
+	float x, y, z;
+	float r, g, b;
+};
+
 int main() {
 	// Initialise GLFW
 	if(!glfwInit()) {
@@ -77,33 +82,20 @@ int main() {
 	// Our ModelViewProjection : multiplication of our 3 matrices
 	glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
-	/*static const GLfloat g_vertex_buffer_data[] = {
-		-1.0f, -1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		 0.0f,  1.0f, 0.0f,
-	};*/
+	const int vertexLength = 5000;
 
-	const int groupsize = 3;
-	static GLfloat g_vertex_buffer_data[groupsize * 1500];
-
-	int vertexCount = sizeof(g_vertex_buffer_data) / sizeof(GLfloat);
-
-	//printf("vertexCount: %d\n", vertexCount);
+	vertex g_vertex_buffer_data[vertexLength];
 
 	srand(time(NULL)); //initialize random seed
 
-	for (int i = 0; i < vertexCount - (groupsize - 1); i+=groupsize) {
-		g_vertex_buffer_data[i] = rand();
-		g_vertex_buffer_data[i + 1] = rand();
-		g_vertex_buffer_data[i + 2] = 0.0f;
-		//fprintf(stdout, "%f, %f, %f\n", g_vertex_buffer_data[i], g_vertex_buffer_data[i + 1], g_vertex_buffer_data[i + 2]);
+	for (int i = 0; i < vertexLength; i++) {
+		g_vertex_buffer_data[i].x = rand();
+		g_vertex_buffer_data[i].y = rand();
+		g_vertex_buffer_data[i].z = 0.0f;
+		g_vertex_buffer_data[i].r = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data[i].g = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data[i].b = (rand() % 101) / 100.0f;
 	}
-
-	//test min and max points
-	/*g_vertex_buffer_data[0] = 0;
-	g_vertex_buffer_data[1] = 0;
-	g_vertex_buffer_data[3] = RAND_MAX;
-	g_vertex_buffer_data[4] = RAND_MAX;*/
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
@@ -123,8 +115,6 @@ int main() {
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 		glVertexAttribPointer(
@@ -132,14 +122,25 @@ int main() {
 				3,                  // size
 				GL_FLOAT,           // type
 				GL_FALSE,           // normalized?
-				0,                  // stride
-				(void*)0            // array buffer offset
+				sizeof(vertex),                // stride
+				(void*) offsetof(vertex, x)          // array buffer offset
 		);
 
-		// Draw the triangle !
-		glDrawArrays(GL_POINTS, 0, vertexCount/groupsize); // 3 indices starting at 0 -> 1 triangle
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(
+				1,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				sizeof(vertex),                  // stride
+				(void*) offsetof(vertex, r)             // array buffer offset
+		);
 
+
+		// Draw the triangle !
+		glDrawArrays(GL_POINTS, 0, vertexLength); // 3 indices starting at 0 -> 1 triangle
 		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
 
 		// Swap buffers
 		glfwSwapBuffers(window);
