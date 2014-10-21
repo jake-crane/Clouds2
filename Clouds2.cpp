@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -17,10 +18,20 @@ using namespace glm;
 
 #include <shader.hpp>
 
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+
+#define M 2147483647
+#define A 16807
+#define Q ( M / A )
+#define R ( M % A )
+
 struct vertex {
 	GLfloat x, y, z;
 	GLfloat r, g, b;
 };
+
+int seed;
 
 /*
 long niminus1 = 8l;
@@ -35,13 +46,6 @@ long jsw_lcg(long max) {
 	return niminus1 % max;
 }
  */
-
-static int seed = 1;
-
-#define M 2147483647
-#define A 16807
-#define Q ( M / A )
-#define R ( M % A )
 
 int jsw_rand(int min, int max) {
 	seed = A * ( seed % Q ) - R * ( seed / Q );
@@ -58,12 +62,6 @@ int main() {
 		printf("%ld\n", jsw_lcg(15));
 	}
 	printf("\n");*/
-
-	printf("jsw_rand():\n");
-	for (int i = 0; i < 20; i++) {
-		printf("%d\n", jsw_rand(4, RAND_MAX));
-	}
-	printf("\n");
 
 	/*printf("myrand():\n");
 	for (int i = 0; i < 20; i++) {
@@ -82,7 +80,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow(800, 600, "Clouds", NULL, NULL);
+	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Clouds", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -129,57 +127,168 @@ int main() {
 	// Our ModelViewProjection : multiplication of our 3 matrices
 	glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
-	const int vertexLength = 7000;
+	const int numOfRandomPointsPerGraph = 7000;
+	const int numOfGraphs = 4;
+	const int numOfxyAxisPoints = 3 * numOfGraphs;
+	const int totalNumOfNonAxisPoints = numOfRandomPointsPerGraph * numOfGraphs;
+	const int totalNumberOfPoints = totalNumOfNonAxisPoints + numOfxyAxisPoints;
 
-	vertex g_vertex_buffer_data[vertexLength];
+	vertex g_vertex_buffer_data[totalNumberOfPoints];
+
+	int g_vertex_buffer_data2_index = numOfRandomPointsPerGraph;
+	vertex* g_vertex_buffer_data2 = &g_vertex_buffer_data[g_vertex_buffer_data2_index];
+
+	int g_vertex_buffer_data3_index = numOfRandomPointsPerGraph * 2;
+	vertex* g_vertex_buffer_data3 = &g_vertex_buffer_data[g_vertex_buffer_data3_index];
+
+	int g_vertex_buffer_data4_index = numOfRandomPointsPerGraph * 3;
+	vertex* g_vertex_buffer_data4 = &g_vertex_buffer_data[g_vertex_buffer_data4_index];
+
+	int xyAxis1_index = totalNumberOfPoints - 12;
+	vertex* xyAxis1 = &g_vertex_buffer_data[xyAxis1_index];
+
+	int xyAxis2_index = totalNumberOfPoints - 9;
+	vertex* xyAxis2 = &g_vertex_buffer_data[xyAxis2_index];
+
+	int xyAxis3_index = totalNumberOfPoints - 6;
+	vertex* xyAxis3 = &g_vertex_buffer_data[xyAxis3_index];
+
+	int xyAxis4_index = totalNumberOfPoints - 3;
+	vertex* xyAxis4 = &g_vertex_buffer_data[xyAxis4_index];
 
 	srand(time(NULL)); //initialize random seed
+	seed = time(NULL) % INT_MAX;
 
-	/*for (int i = 0; i < vertexLength - 3; i++) {
-		g_vertex_buffer_data[i].x = rand();
-		g_vertex_buffer_data[i].y = rand();
+	//data 1
+	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
+		g_vertex_buffer_data[i].x = jsw_rand(0, RAND_MAX);
+		g_vertex_buffer_data[i].y = jsw_rand(0, RAND_MAX);
 		g_vertex_buffer_data[i].z = 0.0f;
-		g_vertex_buffer_data[i].r = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data[i].g = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data[i].b = (rand() % 101) / 100.0f;
-	}*/
+		g_vertex_buffer_data[i].r = jsw_rand(0, 101) / 100.0f;
+		g_vertex_buffer_data[i].g = jsw_rand(0, 101) / 100.0f;
+		g_vertex_buffer_data[i].b = jsw_rand(0, 101) / 100.0f;
+	}
 
-	for (int i = 0; i < vertexLength - 3; i++) {
-			g_vertex_buffer_data[i].x = jsw_rand(0, RAND_MAX);
-			g_vertex_buffer_data[i].y = jsw_rand(0, RAND_MAX);
-			g_vertex_buffer_data[i].z = 0.0f;
-			g_vertex_buffer_data[i].r = jsw_rand(0, 101) / 100.0f;
-			g_vertex_buffer_data[i].g = jsw_rand(0, 101) / 100.0f;
-			g_vertex_buffer_data[i].b = jsw_rand(0, 101) / 100.0f;
-		}
+	xyAxis1[0].x = 0.0f;
+	xyAxis1[0].y = RAND_MAX;
+	xyAxis1[0].z = 0.0f;
+	xyAxis1[0].r = 1.0f;
+	xyAxis1[0].g = 1.0f;
+	xyAxis1[0].b = 1.0f;
 
-	g_vertex_buffer_data[vertexLength - 3].x = 0;
-	g_vertex_buffer_data[vertexLength - 3].y = RAND_MAX;
-	g_vertex_buffer_data[vertexLength - 3].z = 0.0f;
-	g_vertex_buffer_data[vertexLength - 3].r = 1;
-	g_vertex_buffer_data[vertexLength - 3].g = 1;
-	g_vertex_buffer_data[vertexLength - 3].b = 1;
+	xyAxis1[1].x = 0.0f;
+	xyAxis1[1].y = 0.0f;
+	xyAxis1[1].z = 0.0f;
+	xyAxis1[1].r = 1.0f;
+	xyAxis1[1].g = 1.0f;
+	xyAxis1[1].b = 1.0f;
 
-	g_vertex_buffer_data[vertexLength - 2].x = 0;
-	g_vertex_buffer_data[vertexLength - 2].y = 0;
-	g_vertex_buffer_data[vertexLength - 2].z = 0.0f;
-	g_vertex_buffer_data[vertexLength - 2].r = 1;
-	g_vertex_buffer_data[vertexLength - 2].g = 1;
-	g_vertex_buffer_data[vertexLength - 2].b = 1;
+	xyAxis1[2].x = RAND_MAX;
+	xyAxis1[2].y = 0.0f;
+	xyAxis1[2].z = 0.0f;
+	xyAxis1[2].r = 1.0f;
+	xyAxis1[2].g = 1.0f;
+	xyAxis1[2].b = 1.0f;
 
-	g_vertex_buffer_data[vertexLength - 1].x = RAND_MAX;
-	g_vertex_buffer_data[vertexLength - 1].y = 0;
-	g_vertex_buffer_data[vertexLength - 1].z = 0.0f;
-	g_vertex_buffer_data[vertexLength - 1].r = 1;
-	g_vertex_buffer_data[vertexLength - 1].g = 1;
-	g_vertex_buffer_data[vertexLength - 1].b = 1;
+	//data 2
+	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
+		g_vertex_buffer_data2[i].x = rand();
+		g_vertex_buffer_data2[i].y = rand();
+		g_vertex_buffer_data2[i].z = 0.0f;
+		g_vertex_buffer_data2[i].r = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data2[i].g = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data2[i].b = (rand() % 101) / 100.0f;
+	}
+
+	xyAxis2[0].x = 0.0f;
+	xyAxis2[0].y = RAND_MAX;
+	xyAxis2[0].z = 0.0f;
+	xyAxis2[0].r = 1.0f;
+	xyAxis2[0].g = 1.0f;
+	xyAxis2[0].b = 1.0f;
+
+	xyAxis2[1].x = 0.0f;
+	xyAxis2[1].y = 0.0f;
+	xyAxis2[1].z = 0.0f;
+	xyAxis2[1].r = 1.0f;
+	xyAxis2[1].g = 1.0f;
+	xyAxis2[1].b = 1.0f;
+
+	xyAxis2[2].x = RAND_MAX;
+	xyAxis2[2].y = 0.0f;
+	xyAxis2[2].z = 0.0f;
+	xyAxis2[2].r = 1.0f;
+	xyAxis2[2].g = 1.0f;
+	xyAxis2[2].b = 1.0f;
+
+	//data 3
+	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
+		g_vertex_buffer_data3[i].x = rand();
+		g_vertex_buffer_data3[i].y = rand();
+		g_vertex_buffer_data3[i].z = 0.0f;
+		g_vertex_buffer_data3[i].r = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data3[i].g = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data3[i].b = (rand() % 101) / 100.0f;
+	}
+
+	xyAxis3[0].x = 0.0f;
+	xyAxis3[0].y = RAND_MAX;
+	xyAxis3[0].z = 0.0f;
+	xyAxis3[0].r = 1.0f;
+	xyAxis3[0].g = 1.0f;
+	xyAxis3[0].b = 1.0f;
+
+	xyAxis3[1].x = 0.0f;
+	xyAxis3[1].y = 0.0f;
+	xyAxis3[1].z = 0.0f;
+	xyAxis3[1].r = 1.0f;
+	xyAxis3[1].g = 1.0f;
+	xyAxis3[1].b = 1.0f;
+
+	xyAxis3[2].x = RAND_MAX;
+	xyAxis3[2].y = 0.0f;
+	xyAxis3[2].z = 0.0f;
+	xyAxis3[2].r = 1.0f;
+	xyAxis3[2].g = 1.0f;
+	xyAxis3[2].b = 1.0f;
+
+	//data 4
+	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
+		g_vertex_buffer_data4[i].x = rand();
+		g_vertex_buffer_data4[i].y = rand();
+		g_vertex_buffer_data4[i].z = 0.0f;
+		g_vertex_buffer_data4[i].r = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data4[i].g = (rand() % 101) / 100.0f;
+		g_vertex_buffer_data4[i].b = (rand() % 101) / 100.0f;
+	}
+
+	xyAxis4[0].x = 0.0f;
+	xyAxis4[0].y = RAND_MAX;
+	xyAxis4[0].z = 0.0f;
+	xyAxis4[0].r = 1.0f;
+	xyAxis4[0].g = 1.0f;
+	xyAxis4[0].b = 1.0f;
+
+	xyAxis4[1].x = 0.0f;
+	xyAxis4[1].y = 0.0f;
+	xyAxis4[1].z = 0.0f;
+	xyAxis4[1].r = 1.0f;
+	xyAxis4[1].g = 1.0f;
+	xyAxis4[1].b = 1.0f;
+
+	xyAxis4[2].x = RAND_MAX;
+	xyAxis4[2].y = 0.0f;
+	xyAxis4[2].z = 0.0f;
+	xyAxis4[2].r = 1.0f;
+	xyAxis4[2].g = 1.0f;
+	xyAxis4[2].b = 1.0f;
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-	glPointSize(2.0);
+	glPointSize(1.0);
 
 	do {
 
@@ -212,9 +321,27 @@ int main() {
 				(void*) offsetof(vertex, r) // array buffer offset
 		);
 
-		// Draw the triangle !
-		glDrawArrays(GL_LINE_STRIP, vertexLength - 3, 3);
-		glDrawArrays(GL_POINTS, 0, vertexLength - 3); // 3 indices starting at 0 -> 1 triangle
+		glViewport(0, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glScissor(0, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glDrawArrays(GL_LINE_STRIP, xyAxis1_index, 3);
+		glDrawArrays(GL_POINTS, 0, numOfRandomPointsPerGraph);
+
+		glViewport(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glScissor(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glDrawArrays(GL_LINE_STRIP, xyAxis2_index, 3);
+		glDrawArrays(GL_POINTS, g_vertex_buffer_data2_index, numOfRandomPointsPerGraph);
+
+		glViewport(0, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glScissor(0, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glDrawArrays(GL_LINE_STRIP, xyAxis3_index, 3);
+		glDrawArrays(GL_POINTS, g_vertex_buffer_data3_index, numOfRandomPointsPerGraph);
+
+		glViewport(WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glScissor(WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glDrawArrays(GL_LINE_STRIP, xyAxis4_index, 3);
+		glDrawArrays(GL_POINTS, g_vertex_buffer_data4_index, numOfRandomPointsPerGraph);
+
+
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 
@@ -236,4 +363,3 @@ int main() {
 
 	return 0;
 }
-
