@@ -32,6 +32,12 @@ struct vertex {
 };
 
 int seed;
+int current_window_width = WINDOW_WIDTH, current_window_height = WINDOW_HEIGHT;
+
+void window_size_callback(GLFWwindow* window, int width, int height) {
+	current_window_width = width;
+	current_window_height = height;
+}
 
 /**
  * wrapper for rand(void)
@@ -109,6 +115,8 @@ int main() {
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
+
+	glfwSetWindowSizeCallback(window, window_size_callback);
 
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
@@ -243,23 +251,23 @@ int main() {
 				(void*) offsetof(vertex, r) // array buffer offset
 		);
 
-		glViewport(0, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);//upper left
-		glScissor(0, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glViewport(0, current_window_height / 2, current_window_width / 2, current_window_height / 2);//upper left
+		glScissor(0, current_window_height / 2, current_window_width / 2, current_window_height / 2);
 		glDrawArrays(GL_LINE_STRIP, xyAxis1_index, 3);
 		glDrawArrays(GL_POINTS, 0, numOfRandomPointsPerGraph);
 
-		glViewport(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);//upper right
-		glScissor(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glViewport(current_window_width / 2, current_window_height / 2, current_window_width / 2, current_window_height / 2);//upper right
+		glScissor(current_window_width / 2, current_window_height / 2, current_window_width / 2, current_window_height / 2);
 		glDrawArrays(GL_LINE_STRIP, xyAxis2_index, 3);
 		glDrawArrays(GL_POINTS, g_vertex_buffer_data2_index, numOfRandomPointsPerGraph);
 
-		glViewport(0, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);//lower left
-		glScissor(0, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glViewport(0, 0, current_window_width / 2, current_window_height / 2);//lower left
+		glScissor(0, 0, current_window_width / 2, current_window_height / 2);
 		glDrawArrays(GL_LINE_STRIP, xyAxis3_index, 3);
 		glDrawArrays(GL_POINTS, g_vertex_buffer_data3_index, numOfRandomPointsPerGraph);
 
-		glViewport(WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);//lower right
-		glScissor(WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		glViewport(current_window_width / 2, 0, current_window_width / 2, current_window_height / 2);//lower right
+		glScissor(current_window_width / 2, 0, current_window_width / 2, current_window_height / 2);
 		glDrawArrays(GL_LINE_STRIP, xyAxis4_index, 3);
 		glDrawArrays(GL_POINTS, g_vertex_buffer_data4_index, numOfRandomPointsPerGraph);
 
