@@ -140,7 +140,7 @@ int main() {
 
 	// Camera matrix
 	glm::mat4 View       = glm::lookAt(
-			glm::vec3(17500, 16700, 45000), // Camera is at (4,3,3), in World Space
+			glm::vec3(17500, 16700, 44000), // Camera is at (4,3,3), in World Space
 			glm::vec3(17500, 16700, 0), // and looks at the origin
 			glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
 	);
