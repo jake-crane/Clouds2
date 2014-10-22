@@ -33,20 +33,19 @@ struct vertex {
 
 int seed;
 
-/*
-long niminus1 = 8l;
-long myrand(long min, long max) {
-	long range = max - min;
-	niminus1 = (niminus1 * 5l + 12345l);
-	return niminus1 % max;
-}
-
-long jsw_lcg(long max) {
-	niminus1 = ( 2l * niminus1 + 3l ) % 10l;
-	return niminus1 % max;
-}
+/**
+ * wrapper for rand(void)
+ * min and max are inclusive
  */
+int rand(int min, int max) {
+	int range = max - min;
+	return rand() % (range + 1) + min;
+}
 
+/**
+ * seed must be initialized before use
+ * min and max are inclusive
+ */
 int jsw_rand(int min, int max) {
 	seed = A * ( seed % Q ) - R * ( seed / Q );
 	if ( seed <= 0 )
@@ -55,18 +54,41 @@ int jsw_rand(int min, int max) {
 	return min + ( seed % ( (max + 1) - min ) );
 }
 
-int main() {
-
-	/*printf("jsw_lcg():\n");
-	for (int i = 0; i < 20; i++) {
-		printf("%ld\n", jsw_lcg(15));
+void initialize_random_points(vertex* g_vertex_buffer_data, int length, int (*rand_function)(int, int)) {
+	for (int i = 0; i < length; i++) {
+		g_vertex_buffer_data[i].x = rand_function(0, RAND_MAX);
+		g_vertex_buffer_data[i].y = rand_function(0, RAND_MAX);
+		g_vertex_buffer_data[i].z = 0.0f;
+		g_vertex_buffer_data[i].r = rand_function(0, 100) / 100.0f;
+		g_vertex_buffer_data[i].g = rand_function(0, 100) / 100.0f;
+		g_vertex_buffer_data[i].b = rand_function(0, 100) / 100.0f;
 	}
-	printf("\n");*/
+}
 
-	/*printf("myrand():\n");
-	for (int i = 0; i < 20; i++) {
-		printf("%ld\n", myrand(0, 10));
-	}*/
+void initialize_xy_axis(vertex* xyAxis) {
+	xyAxis[0].x = 0.0f;
+	xyAxis[0].y = RAND_MAX;
+	xyAxis[0].z = 0.0f;
+	xyAxis[0].r = 1.0f;
+	xyAxis[0].g = 1.0f;
+	xyAxis[0].b = 1.0f;
+
+	xyAxis[1].x = 0.0f;
+	xyAxis[1].y = 0.0f;
+	xyAxis[1].z = 0.0f;
+	xyAxis[1].r = 1.0f;
+	xyAxis[1].g = 1.0f;
+	xyAxis[1].b = 1.0f;
+
+	xyAxis[2].x = RAND_MAX;
+	xyAxis[2].y = 0.0f;
+	xyAxis[2].z = 0.0f;
+	xyAxis[2].r = 1.0f;
+	xyAxis[2].g = 1.0f;
+	xyAxis[2].b = 1.0f;
+}
+
+int main() {
 
 	// Initialise GLFW
 	if(!glfwInit()) {
@@ -127,7 +149,7 @@ int main() {
 	// Our ModelViewProjection : multiplication of our 3 matrices
 	glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
-	const int numOfRandomPointsPerGraph = 7000;
+	const int numOfRandomPointsPerGraph = 1000;
 	const int numOfGraphs = 4;
 	const int numOfxyAxisPoints = 3 * numOfGraphs;
 	const int totalNumOfNonAxisPoints = numOfRandomPointsPerGraph * numOfGraphs;
@@ -159,129 +181,29 @@ int main() {
 	srand(time(NULL)); //initialize random seed
 	seed = time(NULL) % INT_MAX;
 
-	//data 1
-	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
-		g_vertex_buffer_data[i].x = jsw_rand(0, RAND_MAX);
-		g_vertex_buffer_data[i].y = jsw_rand(0, RAND_MAX);
-		g_vertex_buffer_data[i].z = 0.0f;
-		g_vertex_buffer_data[i].r = jsw_rand(0, 101) / 100.0f;
-		g_vertex_buffer_data[i].g = jsw_rand(0, 101) / 100.0f;
-		g_vertex_buffer_data[i].b = jsw_rand(0, 101) / 100.0f;
+	printf("rand(min, max):\n");
+	for (int i = 0; i < 10; i++) {
+		printf("%d\n", rand(15, 18));
 	}
+	printf("\n");
 
-	xyAxis1[0].x = 0.0f;
-	xyAxis1[0].y = RAND_MAX;
-	xyAxis1[0].z = 0.0f;
-	xyAxis1[0].r = 1.0f;
-	xyAxis1[0].g = 1.0f;
-	xyAxis1[0].b = 1.0f;
-
-	xyAxis1[1].x = 0.0f;
-	xyAxis1[1].y = 0.0f;
-	xyAxis1[1].z = 0.0f;
-	xyAxis1[1].r = 1.0f;
-	xyAxis1[1].g = 1.0f;
-	xyAxis1[1].b = 1.0f;
-
-	xyAxis1[2].x = RAND_MAX;
-	xyAxis1[2].y = 0.0f;
-	xyAxis1[2].z = 0.0f;
-	xyAxis1[2].r = 1.0f;
-	xyAxis1[2].g = 1.0f;
-	xyAxis1[2].b = 1.0f;
-
-	//data 2
-	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
-		g_vertex_buffer_data2[i].x = rand();
-		g_vertex_buffer_data2[i].y = rand();
-		g_vertex_buffer_data2[i].z = 0.0f;
-		g_vertex_buffer_data2[i].r = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data2[i].g = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data2[i].b = (rand() % 101) / 100.0f;
+	printf("jsw_rand(min, max):\n");
+	for (int i = 0; i < 10; i++) {
+		printf("%d\n", jsw_rand(15, 18));
 	}
+	printf("\n");
 
-	xyAxis2[0].x = 0.0f;
-	xyAxis2[0].y = RAND_MAX;
-	xyAxis2[0].z = 0.0f;
-	xyAxis2[0].r = 1.0f;
-	xyAxis2[0].g = 1.0f;
-	xyAxis2[0].b = 1.0f;
+	initialize_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, jsw_rand);
+	initialize_xy_axis(xyAxis1);
 
-	xyAxis2[1].x = 0.0f;
-	xyAxis2[1].y = 0.0f;
-	xyAxis2[1].z = 0.0f;
-	xyAxis2[1].r = 1.0f;
-	xyAxis2[1].g = 1.0f;
-	xyAxis2[1].b = 1.0f;
+	initialize_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, rand);
+	initialize_xy_axis(xyAxis2);
 
-	xyAxis2[2].x = RAND_MAX;
-	xyAxis2[2].y = 0.0f;
-	xyAxis2[2].z = 0.0f;
-	xyAxis2[2].r = 1.0f;
-	xyAxis2[2].g = 1.0f;
-	xyAxis2[2].b = 1.0f;
+	initialize_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, rand);
+	initialize_xy_axis(xyAxis3);
 
-	//data 3
-	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
-		g_vertex_buffer_data3[i].x = rand();
-		g_vertex_buffer_data3[i].y = rand();
-		g_vertex_buffer_data3[i].z = 0.0f;
-		g_vertex_buffer_data3[i].r = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data3[i].g = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data3[i].b = (rand() % 101) / 100.0f;
-	}
-
-	xyAxis3[0].x = 0.0f;
-	xyAxis3[0].y = RAND_MAX;
-	xyAxis3[0].z = 0.0f;
-	xyAxis3[0].r = 1.0f;
-	xyAxis3[0].g = 1.0f;
-	xyAxis3[0].b = 1.0f;
-
-	xyAxis3[1].x = 0.0f;
-	xyAxis3[1].y = 0.0f;
-	xyAxis3[1].z = 0.0f;
-	xyAxis3[1].r = 1.0f;
-	xyAxis3[1].g = 1.0f;
-	xyAxis3[1].b = 1.0f;
-
-	xyAxis3[2].x = RAND_MAX;
-	xyAxis3[2].y = 0.0f;
-	xyAxis3[2].z = 0.0f;
-	xyAxis3[2].r = 1.0f;
-	xyAxis3[2].g = 1.0f;
-	xyAxis3[2].b = 1.0f;
-
-	//data 4
-	for (int i = 0; i < numOfRandomPointsPerGraph; i++) {
-		g_vertex_buffer_data4[i].x = rand();
-		g_vertex_buffer_data4[i].y = rand();
-		g_vertex_buffer_data4[i].z = 0.0f;
-		g_vertex_buffer_data4[i].r = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data4[i].g = (rand() % 101) / 100.0f;
-		g_vertex_buffer_data4[i].b = (rand() % 101) / 100.0f;
-	}
-
-	xyAxis4[0].x = 0.0f;
-	xyAxis4[0].y = RAND_MAX;
-	xyAxis4[0].z = 0.0f;
-	xyAxis4[0].r = 1.0f;
-	xyAxis4[0].g = 1.0f;
-	xyAxis4[0].b = 1.0f;
-
-	xyAxis4[1].x = 0.0f;
-	xyAxis4[1].y = 0.0f;
-	xyAxis4[1].z = 0.0f;
-	xyAxis4[1].r = 1.0f;
-	xyAxis4[1].g = 1.0f;
-	xyAxis4[1].b = 1.0f;
-
-	xyAxis4[2].x = RAND_MAX;
-	xyAxis4[2].y = 0.0f;
-	xyAxis4[2].z = 0.0f;
-	xyAxis4[2].r = 1.0f;
-	xyAxis4[2].g = 1.0f;
-	xyAxis4[2].b = 1.0f;
+	initialize_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, rand);
+	initialize_xy_axis(xyAxis4);
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
