@@ -241,6 +241,23 @@ int main() {
 		// Use our shader
 		glUseProgram(programID);
 
+		if (glfwGetKey( window, GLFW_KEY_1 ) == GLFW_PRESS){
+			initialize_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, rand);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+		}
+		if (glfwGetKey( window, GLFW_KEY_2 ) == GLFW_PRESS){
+			initialize_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, rand);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+		}
+		if (glfwGetKey( window, GLFW_KEY_3 ) == GLFW_PRESS){
+			initialize_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, rand);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+		}
+		if (glfwGetKey( window, GLFW_KEY_4 ) == GLFW_PRESS){
+			initialize_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, rand);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+		}
+
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
