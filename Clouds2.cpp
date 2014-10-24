@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <limits.h>
+#include <random>
+#include <chrono>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -26,12 +28,15 @@ using namespace glm;
 #define Q ( M / A )
 #define R ( M % A )
 
+int seed;
+std::default_random_engine default_generator(std::chrono::system_clock::now().time_since_epoch().count());
+std::knuth_b knuth_b_generator(std::chrono::system_clock::now().time_since_epoch().count());
+
 struct vertex {
 	GLfloat x, y, z;
 	GLfloat r, g, b;
 };
 
-int seed;
 int current_window_width = WINDOW_WIDTH, current_window_height = WINDOW_HEIGHT;
 
 void window_size_callback(GLFWwindow* window, int width, int height) {
@@ -58,6 +63,16 @@ int jsw_rand(int min, int max) {
 		seed += M;
 	//return seed % (max + 1);
 	return min + ( seed % ( (max + 1) - min ) );
+}
+
+int uniform_int_distribution_rand(int min, int max) {
+	std::uniform_int_distribution<int> distribution(min, max);
+	return distribution(default_generator);
+}
+
+int knuth_b_rand(int min, int max) {
+	std::uniform_int_distribution<int> distribution(min, max);
+	return distribution(knuth_b_generator);
 }
 
 void initialize_random_points(vertex* g_vertex_buffer_data, int length, int (*rand_function)(int, int)) {
@@ -186,31 +201,29 @@ int main() {
 	int xyAxis4_index = totalNumberOfPoints - 3;
 	vertex* xyAxis4 = &g_vertex_buffer_data[xyAxis4_index];
 
+	//seed rand and jsw_rand
 	srand(time(NULL)); //initialize random seed
 	seed = time(NULL) % INT_MAX;
 
-	printf("rand(min, max):\n");
-	for (int i = 0; i < 10; i++) {
-		printf("%d\n", rand(15, 18));
+	//test random functions
+	int (*functions[])(int, int) = {rand, jsw_rand, uniform_int_distribution_rand, knuth_b_rand};
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 10; j++) {
+			printf("%d\n", functions[i](15, 18));
+		}
+		printf("\n");
 	}
-	printf("\n");
 
-	printf("jsw_rand(min, max):\n");
-	for (int i = 0; i < 10; i++) {
-		printf("%d\n", jsw_rand(15, 18));
-	}
-	printf("\n");
-
-	initialize_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, jsw_rand);
+	initialize_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, rand);
 	initialize_xy_axis(xyAxis1);
 
-	initialize_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, rand);
+	initialize_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, jsw_rand);
 	initialize_xy_axis(xyAxis2);
 
-	initialize_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, rand);
+	initialize_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, uniform_int_distribution_rand);
 	initialize_xy_axis(xyAxis3);
 
-	initialize_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, rand);
+	initialize_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, knuth_b_rand);
 	initialize_xy_axis(xyAxis4);
 
 	GLuint vertexbuffer;
