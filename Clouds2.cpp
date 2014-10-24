@@ -75,7 +75,7 @@ int knuth_b_rand(int min, int max) {
 	return distribution(knuth_b_generator);
 }
 
-void initialize_random_points(vertex* g_vertex_buffer_data, int length, int (*rand_function)(int, int)) {
+void generate_random_points(vertex* g_vertex_buffer_data, int length, int (*rand_function)(int, int)) {
 	for (int i = 0; i < length; i++) {
 		g_vertex_buffer_data[i].x = rand_function(0, RAND_MAX);
 		g_vertex_buffer_data[i].y = rand_function(0, RAND_MAX);
@@ -214,16 +214,16 @@ int main() {
 		printf("\n");
 	}
 
-	initialize_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, rand);
+	generate_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, rand);
 	initialize_xy_axis(xyAxis1);
 
-	initialize_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, jsw_rand);
+	generate_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, jsw_rand);
 	initialize_xy_axis(xyAxis2);
 
-	initialize_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, uniform_int_distribution_rand);
+	generate_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, uniform_int_distribution_rand);
 	initialize_xy_axis(xyAxis3);
 
-	initialize_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, knuth_b_rand);
+	generate_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, knuth_b_rand);
 	initialize_xy_axis(xyAxis4);
 
 	GLuint vertexbuffer;
@@ -242,19 +242,19 @@ int main() {
 		glUseProgram(programID);
 
 		if (glfwGetKey( window, GLFW_KEY_1 ) == GLFW_PRESS){
-			initialize_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, rand);
+			generate_random_points(g_vertex_buffer_data, numOfRandomPointsPerGraph, rand);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 		}
 		if (glfwGetKey( window, GLFW_KEY_2 ) == GLFW_PRESS){
-			initialize_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, rand);
+			generate_random_points(g_vertex_buffer_data2, numOfRandomPointsPerGraph, rand);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 		}
 		if (glfwGetKey( window, GLFW_KEY_3 ) == GLFW_PRESS){
-			initialize_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, rand);
+			generate_random_points(g_vertex_buffer_data3, numOfRandomPointsPerGraph, rand);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 		}
 		if (glfwGetKey( window, GLFW_KEY_4 ) == GLFW_PRESS){
-			initialize_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, rand);
+			generate_random_points(g_vertex_buffer_data4, numOfRandomPointsPerGraph, rand);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 		}
 
