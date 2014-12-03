@@ -1,3 +1,0 @@
-random colors
-user input
-compare random functions
